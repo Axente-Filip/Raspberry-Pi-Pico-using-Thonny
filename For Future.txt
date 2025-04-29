@@ -1,2 +1,9 @@
 ---------------------------------------------------------------------------------/// FIAX ///-------------------------------------------------------------------------------
-I will try to make a "mini tutorial" with original code and explain it ( make and using own library )
+
+*I will try to make a "mini tutorial" with original code and explain it ( create and using own library ); much simplier and easly "translate"
+
+^^Fix some issue 
+	-Processing 3D model
+	-Yaw instability
+
+&Debuging some problem
