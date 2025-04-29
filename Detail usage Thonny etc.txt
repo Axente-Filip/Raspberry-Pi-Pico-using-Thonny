@@ -1,21 +1,31 @@
----------------------------------------------------------------------------/// FIAX ///---------------------------------------------------------------------------------------------------------
-	#Thonny
-	
--Instalare Link: https://thonny.org
-^Inainte sa conectezi la PC se tine apasat pe butonul de pe raspberry py pico (se va deschide directorul de pe raspberry pi pico)
-^^Deschide Thnonny->Run->Configure Interpreter->MicroPython (Raspberry Pi Pico)->Install or update MicroPthon->Alege placa->Install->Ok
-^^^Dupa ce s-a instalat in raspebry pi pico firmewul care trebuie, se desconecteaz si se reconecteaza fara a mai apasa pe butonul de pe placa
-^^^^Deschide Thnonny->View->Files
-
--SCREIERE COD SI EXECUTARE
-^Dupa ce am scris codul->Save->Save on Pico->Shell->CTRL+D->Run
-
--Plotare
-^View->Plotter
-
----------------------------------------------------------------------------/// FIAX ///---------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------/// FIAX Raspberry Pi Pico Configuration ///--------------------------------------------------------------------------------------
 
 	#Raspberry Pi Pico
 	
--Pentru a asigura functionalitate buna, se recomanda ca toate fisierele daca vrem sa le folosim pe toate (toti senzorii in acelas cod), sa se puna toate fisierele in acelas folder (director)
--Folosim main.py pentru auto-rulare atunci cand alimentam Raspberry Pi Pico
+^ Download the latest firmware for the board you want to use, in our case, the Raspberry Pi Pico: https://micropython.org/download/RPI_PICO/
+^^ Copy the downloaded file (in my case, RPI_PICO-20250424-v1.26.0-preview.31.g076e07197.uf2) to your board (next step).
+^^^ Before connecting the board, press and hold the button on the Raspberry Pi Pico, then power the board, and the Pico directory will open on your PC.
+^^^^ After copying the file to the Raspberry Pi Pico directory, the directory will automatically close. Disconnect and reconnect the board without pressing the boot button again (from now on).
+
+---------------------------------------------------------------------------/// FIAX ///---------------------------------------------------------------------------------------------------------
+	#Thonny
+	
+-Installation link: https://thonny.org
+^ Open Thonny -> Run -> Configure Interpreter -> MicroPython (Raspberry Pi Pico) -> Install or update MicroPython -> Select the board -> Install -> OK.
+^^ After installing the required firmware on the Raspberry Pi Pico, disconnect and reconnect without pressing the button on the board.
+^^^ Open Thonny -> View -> Files.
+
+-Writing and Running Code
+^ Create a file in a directory, for example, Desktop/MyCode. Right-click -> New -> Text Document and edit the file, for example, main.py.
+^^ Open the file in Thonny, edit it, save it, right-click -> Upload to... -> Run.
+^^^ If you want to modify the code, stop the execution -> CTRL+S -> Run.
+
+-Plotting
+^ View -> Plotter.
+
+---------------------------------------------------------------------------/// FIAX ///---------------------------------------------------------------------------------------------------------
+
+	#Code
+
+-To ensure smooth functionality, it is recommended to place all files (for all sensors) in the same folder (directory) if you want to use them in the same code.
+-Use main.py for auto-running when powering the Raspberry Pi Pico.
