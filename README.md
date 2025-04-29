@@ -1,14 +1,15 @@
------------------------------------------------------------------------/// FIAX ///---------------------------------------------------------------------
+----------------------------------------------------------------------------------/// ///--------------------------------------------------------------------------------
+# FIAX
 <br>
-🚀 Welcome!
+<h1 style="font-size: 48px; color: blue;">🚀 Welcome!</h1>
 <br>
   Here, you'll find Python code for Raspberry Pi Pico using Thonny. Perfect for hobbyists and professionals alike.
 <br>
 
 <br>
--------------------------------------------------------------------/// Future plans ///----------------------------------------------------------------
+-----------------------------------------------------------------------------/// Future plans ///------------------------------------------------------------------------
 <br>
-🛠️ Here's what's coming next:
+<h1 style="font-size: 48px; color: blue;">🛠️ Here's what's coming next:</h1>
 <br>
 - Mini Tutorials:
 I'll create simplified tutorials with original code and detailed explanations, including how to create and use your own libraries.<br>
