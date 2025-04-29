@@ -5,5 +5,6 @@
 ^^Fix some issue 
 	-Processing 3D model
 	-Yaw instability
+	-Usage MPU9250 and DHT11 in same time on main.py ( All in one )
 
 &Debuging some problem
