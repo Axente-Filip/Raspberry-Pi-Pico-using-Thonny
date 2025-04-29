@@ -1,9 +1,21 @@
-Inainte sa conectezi la PC se tine apasat pe butonul de pe raspberry py pico (se va deschide directorul de pe raspberry pi pico)
-Deschide Thnonny->Run->Configure Interpreter->MicroPython (Raspberry Pi Pico)->Install or update MicroPthon->Alege placa->Install->Ok
-Dupa ce s-a instalat in raspebry pi pico firmewul care trebuie, se desconecteaz si se reconecteaza fara a mai apasa pe butonul de pe placa
-Deschide Thnonny->View->Files
+---------------------------------------------------------------------------/// FIAX ///---------------------------------------------------------------------------------------------------------
+	#Thonny
+	
+-Instalare Link: https://thonny.org
+^Inainte sa conectezi la PC se tine apasat pe butonul de pe raspberry py pico (se va deschide directorul de pe raspberry pi pico)
+^^Deschide Thnonny->Run->Configure Interpreter->MicroPython (Raspberry Pi Pico)->Install or update MicroPthon->Alege placa->Install->Ok
+^^^Dupa ce s-a instalat in raspebry pi pico firmewul care trebuie, se desconecteaz si se reconecteaza fara a mai apasa pe butonul de pe placa
+^^^^Deschide Thnonny->View->Files
 
-SCREIERE COD SI EXECUTARE
-Dupa ce am scris codul->Save->Save on Pico->Shell->CTRL+D->Run
+-SCREIERE COD SI EXECUTARE
+^Dupa ce am scris codul->Save->Save on Pico->Shell->CTRL+D->Run
 
-Plotare:View->Plotter
+-Plotare
+^View->Plotter
+
+---------------------------------------------------------------------------/// FIAX ///---------------------------------------------------------------------------------------------------------
+
+	#Raspberry Pi Pico
+	
+-Pentru a asigura functionalitate buna, se recomanda ca toate fisierele daca vrem sa le folosim pe toate (toti senzorii in acelas cod), sa se puna toate fisierele in acelas folder (director)
+-Folosim main.py pentru auto-rulare atunci cand alimentam Raspberry Pi Pico
