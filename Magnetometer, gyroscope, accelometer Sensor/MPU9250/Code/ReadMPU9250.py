@@ -10,51 +10,49 @@ LED.value(0)
 
 # Configure I2C for MPU9250
 I2C_ID = 0
-SDA = Pin(0)
-SCL = Pin(1)
+SDA = Pin(0)      #	Pin on Raspberry Pi Pico for SDA MPU9250
+SCL = Pin(1)      #	Pin on Raspberry Pi Pico for SCL MPU9250
 i2c = I2C(id=I2C_ID, scl=SCL, sda=SDA)
 
 # Initialize MPU9250
 print("Scanning I2C bus...")
 print(i2c.scan())
-m = MPU9250(i2c)
+m = MPU9250(i2c)		# MPU9250 is "m" in entire code
 print("MPU9250 Initialized!")
 
+# Time management for sensor readings
+previous_time = time()
+dt = 0.01
+
+""" MAGNETOMETER SETTING """
+declination_angle = 0.853933  # Magnetic declination for Timisoara = declanation betwee originat NORTH and our NORTH ( Timisoara in my case )
+filtered_magx = 0
+filtered_magy = 0
 # Magnetometer Calibration
+# Fix Hard and Soft Iron distorsion
 print("Calibrating magnetometer...")
-m.ak8963.calibrate(count=10)
-LED.value(0)  # Turn LED off after calibration
+# You need to rotate magnetometer in this time (in my case 100 step, you can have max 256 steps), for better accurity and better calibration, it calculate max and mic value that can get the magnetometer 
+m.ak8963.calibrate(count=100)		# Run calib for 100 step instead of max 256, we need to move the magnetometer for calib
+LED.value(0)  						# Turn LED during calibration
 print("Calibration complete!")
 
+# Low-pass filter 
+""" Magnetometer is sensible to high ferquency, vibration and inteference from other device/ component-> attenuating high frequency signal; Earth freq = 0.1 Hz """
+def low_pass_filter(preveu_value, new_value):
+    return 0.99 * preveu_value +  0.01 * new_value
+    # 0.85+ 0.15 need to be only =1, so we can chose 0.9 and 0.1 = 1, the value of new_value incrase=> the truth about preveu_value will incrase => distorsion increase at output (it will be shaky )
+    # if we incrase the vlaue of " * new_value", it will be slower (rotate slow), but the shaky will be eliminated much better 
+
+""" KALMAN SETTING """
 # Kalman filter parameters
 pitch, roll, yaw = 0.0, 0.0, 0.0
 Q_angle, Q_bias, R_measure = 0.01, 0.003, 0.03
 bias = 0.0
 P = [[0.0, 0.0], [0.0, 0.0]]
 
-# Time management for sensor readings
-previous_time = time()
-dt = 0.02
-
-# Smoothing lists for magnetometer
-mag_x_smooth = [0.0] * 5
-mag_y_smooth = [0.0] * 5
-previous_yaw = 0.0
-
 # Initialize filtered values for low-pass filter
 filtered_x_value = 0.0  # Initialize filtered x-value
 filtered_y_value = 0.0  # Initialize filtered y-value
-
-# Function for smoothing data
-def smooth_data(new_value, data_list):
-    data_list.pop(0)  # Remove oldest value
-    data_list.append(new_value)  # Add new value
-    return sum(data_list) / len(data_list)  # Compute average
-
-# Low-pass filter function
-def low_pass_filter(raw_value: float, remembered_value: float) -> float:
-    alpha = 0.8
-    return (alpha * remembered_value) + (1.0 - alpha) * raw_value
 
 # Kalman filter implementation
 def kalman_filter(angle, gyro_rate, accel_angle):
@@ -83,20 +81,9 @@ def kalman_filter(angle, gyro_rate, accel_angle):
 
     return angle
 
-# Degrees to heading function (fixed missing definition)
-def degrees_to_heading(degrees):
-    if 0 <= degrees < 90:
-        return "North-East"
-    elif 90 <= degrees < 180:
-        return "South-East"
-    elif 180 <= degrees < 270:
-        return "South-West"
-    else:
-        return "North-West"
-
 # Main sensor reading and calculations
 def get_reading():
-    global previous_time, dt, pitch, roll, previous_yaw, filtered_x_value, filtered_y_value
+    global previous_time, dt, pitch, roll, previous_yaw, filtered_magx, filtered_magy, declination_angle
 
     # Time management
     current_time = time()
@@ -105,53 +92,30 @@ def get_reading():
         dt = 0.02
     previous_time = current_time
 
-    # Read sensor data
+    # Read sensor data gyro, accelometer and magnetometer
     gx, gy, gz = m.gyro
     acc_x, acc_y, acc_z = m.acceleration
-    mag_x, mag_y, mag_z = m.magnetic
+    mag_x, mag_y,  mag_z = m.magnetic
 
     # Kalman filtering for pitch and roll
     pitch = kalman_filter(pitch, gx, atan2(-acc_x, sqrt(acc_y ** 2 + acc_z ** 2)) * 180 / pi)
     roll = kalman_filter(roll, gy, atan2(acc_y, acc_z) * 180 / pi)
 
-    # Smooth magnetometer data
-    mag_x = smooth_data(mag_x, mag_x_smooth)
-    mag_y = smooth_data(mag_y, mag_y_smooth)
+    """ MAGNETOMETER """
     # Calculate yaw from magnetometer
-    yaw = atan2(mag_y, mag_x)
-    declination_angle = 0.853933  # Magnetic declination for Timisoara
-    yaw += declination_angle
+    filtered_magx = low_pass_filter (filtered_magx, mag_x)
+    filtered_magy = low_pass_filter (filtered_magy, mag_y)
+    
+    yaw = ( atan2(filtered_magx, filtered_magy) * (180 / pi) ) + declination_angle
 
     # Normalize yaw to 0-360 degrees
     if yaw < 0:
-        yaw += 2 * pi
-    if yaw > 2 * pi:
-        yaw -= 2 * pi
-    yaw = yaw * 180.0 / pi
+        yaw += 360
 
-    # Apply dampening for yaw
-    yaw = 0.9 * previous_yaw + 0.1 * yaw
-    previous_yaw = yaw
+    return pitch, roll, yaw
 
-
-    # YAW=AZ BUT OTHER OPERATION
-    # Low-pass filter for magnetometer values
-    filtered_x_value = low_pass_filter(mag_x, filtered_x_value)
-    filtered_y_value = low_pass_filter(mag_y, filtered_y_value)
-
-    # Calculate azimuth (az)
-    az = 90 - atan2(filtered_y_value, filtered_x_value) * 180 / pi
-
-    # Ensure azimuth is always positive and between 0–360 degrees
-    if az < 0:
-        az += 360
-
-    heading = degrees_to_heading(az)
-
-    return pitch, roll, yaw, az, heading
-
-# Main loop for real-time sensor output
+# Main loop for real-time sensor Read
 while True:
     LED.on()
-    pitch, roll, yaw, az, heading = get_reading()
+    pitch, roll, yaw = get_reading()
     print(f"Pitch: {pitch}, Roll: {roll}, Yaw: {yaw}")
