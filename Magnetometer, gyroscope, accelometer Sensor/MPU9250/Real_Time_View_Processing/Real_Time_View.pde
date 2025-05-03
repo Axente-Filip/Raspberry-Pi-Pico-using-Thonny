@@ -9,6 +9,28 @@ void setup() {
   myPort.bufferUntil('\n');  // Wait for a newline character in the serial data
 }
 
+void drawWheel(float x, float y, float z) {
+  pushMatrix();
+  translate(x, y, z);
+  rotateZ(HALF_PI);  // Rotate wheel to lie flat on the ground
+  cylinder(20, 30);  // Shorter height for realistic wheel thickness
+  popMatrix();
+}
+
+// Improved Cylinder Function
+void cylinder(float radius, float height) {
+  int sides = 24;
+  beginShape(QUAD_STRIP);
+  for (int i = 0; i <= sides; i++) {
+    float angle = TWO_PI / sides * i;
+    float x = cos(angle) * radius;
+    float z = sin(angle) * radius;
+    vertex(x, -height / 2, z);
+    vertex(x, height / 2, z);
+  }
+  endShape();
+}
+
 void draw() {
   background(200);  // Gray background
   lights();  // Add lighting
@@ -17,47 +39,35 @@ void draw() {
   pushMatrix();  // Save current transformation matrix
   translate(width / 2, height / 2, -200);  // Center the object
   rotateY(radians(-yaw));  // Rotate the car based on yaw
-  rotateX(radians(-pitch));  // Rotate the car based on pitch
-  rotateZ(radians(-roll));  // Rotate the car based on roll
+  rotateZ(radians(-pitch));  // Rotate the car based on pitch
+  rotateX(radians(roll));  // Rotate the car based on roll
 
   // Car Body
   fill(0, 102, 204);  // Blue color for the body
-  box(200, 50, 100);  // Main car body
+  box(200, 50, 300);  // Main car body
 
   // Car Roof
   translate(0, -40, 0);  // Move up for the roof
   fill(255, 0, 0);  // Red color for the roof
-  box(150, 40, 80);  // Roof
+  box(150, 40, 180);  // Roof
 
-  // Car Wheels
-  translate(0, 40, 0);  // Move back down for wheels
-  fill(50, 50, 50);  // Dark gray for wheels
-  pushMatrix();
-  translate(-70, 30, 50);  // Front-left wheel
-  cylinder(20, 20);
-  popMatrix();
-  pushMatrix();
-  translate(70, 30, 50);  // Front-right wheel
-  cylinder(20, 20);
-  popMatrix();
-  pushMatrix();
-  translate(-70, 30, -50);  // Rear-left wheel
-  cylinder(20, 20);
-  popMatrix();
-  pushMatrix();
-  translate(70, 30, -50);  // Rear-right wheel
-  cylinder(20, 20);
-  popMatrix();
+  // Wheels (Fixed Orientation)
+  fill(50, 50, 50);
+  drawWheel(-70, 80, 120);  // Front-left
+  drawWheel(70, 80, 120);   // Front-right
+  drawWheel(-70, 80, -120); // Rear-left
+  drawWheel(70, 80, -120);  // Rear-right
 
   // Front Headlights
-  translate(0, -30, 60); // Move to the front of the car
+  translate(0, 30, 150); // Move to the front of the car
   fill(255, 255, 0);  // Yellow for headlights
   ellipse(-60, 0, 20, 20); // Left headlight
   ellipse(60, 0, 20, 20);  // Right headlight
 
   // Rear Taillights
-  translate(0, 0, -120); // Move to the back of the car
-  fill(255, 0, 0);  // Red for taillights
+  translate(0, -10, -140); // Move closer to the rear edge
+  fill(255, 0, 0); // Red taillights
+  sphere(10); // Spheres are affected by lighting better than ellipses
   ellipse(-60, 0, 20, 20); // Left taillight
   ellipse(60, 0, 20, 20);  // Right taillight
   popMatrix();  // Restore transformation matrix
@@ -69,20 +79,6 @@ void draw() {
   text("Pitch: " + nf(pitch, 1, 1) + "°", width / 2, height - 80);  // Display pitch
   text("Roll: " + nf(roll, 1, 1) + "°", width / 2, height - 40);   // Display roll
   text("Yaw: " + nf(yaw, 1, 1) + "°", width / 2, height - 20);   // Display roll
-}
-
-// Function to draw a cylinder (for the wheels)
-void cylinder(float radius, float height) {
-  int sides = 24;  // Number of sides for the cylinder
-  beginShape(QUAD_STRIP);
-  for (int i = 0; i <= sides; i++) {
-    float angle = TWO_PI / sides * i;
-    float x = cos(angle) * radius;
-    float z = sin(angle) * radius;
-    vertex(x, -height / 2, z);
-    vertex(x, height / 2, z);
-  }
-  endShape();
 }
 
 void serialEvent(Serial myPort) {
