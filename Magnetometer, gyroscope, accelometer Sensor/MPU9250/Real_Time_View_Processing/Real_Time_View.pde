@@ -1,10 +1,10 @@
 import processing.serial.*;
 
 Serial myPort;  // Serial port object
-float pitch = 0, roll = 0, yaw = 0; // Initialize pitch, roll, yaw
+float pitch = 0, roll = 0, yaw  = 0, temp = 0, humidity = 0; // Initialize pitch, roll, yaw
 
 void setup() {
-  size(800, 800, P3D);  // Create a 3D window
+  size(1100, 900, P3D);  // Create a 3D window
   myPort = new Serial(this, "COM3", 115200);  // Replace "COM3" with your microcontroller's port
   myPort.bufferUntil('\n');  // Wait for a newline character in the serial data
 }
@@ -32,8 +32,10 @@ void cylinder(float radius, float height) {
 }
 
 void draw() {
-  background(200);  // Gray background
+  background(0, 50, 120); // Red-Green-Blue combination
   lights();  // Add lighting
+  println("Pitch: " + pitch + ", Roll: " + roll + ", Yaw: " + yaw);
+
 
   // Draw the 3D car model
   pushMatrix();  // Save current transformation matrix
@@ -43,12 +45,12 @@ void draw() {
   rotateX(radians(roll));  // Rotate the car based on roll
 
   // Car Body
-  fill(0, 102, 204);  // Blue color for the body
+  fill(0, 150, 100);  // Color
   box(200, 50, 300);  // Main car body
 
   // Car Roof
+  fill(255, 255, 255);  // Color
   translate(0, -40, 0);  // Move up for the roof
-  fill(255, 0, 0);  // Red color for the roof
   box(150, 40, 180);  // Roof
 
   // Wheels (Fixed Orientation)
@@ -79,6 +81,8 @@ void draw() {
   text("Pitch: " + nf(pitch, 1, 1) + "°", width / 2, height - 80);  // Display pitch
   text("Roll: " + nf(roll, 1, 1) + "°", width / 2, height - 40);   // Display roll
   text("Yaw: " + nf(yaw, 1, 1) + "°", width / 2, height - 20);   // Display roll
+  text("Temperature: " + nf(temp, 1, 1) + "°C", width / 2, height - 120);   // Display roll
+  text("Humidity: " + nf(humidity, 1, 1) + "%", width / 2, height - 100);   // Display roll
 }
 
 void serialEvent(Serial myPort) {
@@ -87,26 +91,36 @@ void serialEvent(Serial myPort) {
         dataString = trim(dataString);  // Clean up the data
         println("Raw Data: [" + dataString + "]");  // Debugging raw data
 
-        // Remove labels using regex
-        dataString = dataString.replaceAll("Pitch:|Roll:|Yaw:", "").trim();
+        // Remove labels dynamically
+        dataString = dataString.replaceAll("[a-zA-Z]+:", "").trim(); 
         println("Cleaned Data: [" + dataString + "]");  // Debugging cleaned data
 
         // Split the cleaned data into components
         String[] values = split(dataString, ',');  // Split by commas
         println("Values Length: " + values.length);
 
-        if (values.length >= 3) {  // Validate that we have enough data
+        if (values.length >= 3) { // Always update pitch, roll, yaw
             try {
                 pitch = float(values[0].trim());
                 roll = float(values[1].trim());
                 yaw = float(values[2].trim());
-
-                println("Parsed Data - Pitch: " + pitch + ", Roll: " + roll + ", Yaw: " + yaw);
             } catch (NumberFormatException e) {
-                println("Error parsing data: " + e.getMessage());
+                println("Error parsing pitch, roll, yaw: " + e.getMessage());
             }
-        } else {
-            println("Unexpected Data Format - Values Length: " + values.length);
         }
+
+        if (values.length >= 5) { // Only update temp & humidity if present
+            try {
+                pitch = float(values[0].trim());
+                roll = float(values[1].trim());
+                yaw = float(values[2].trim());
+                temp = float(values[3].trim());
+                humidity = float(values[4].trim());
+            } catch (NumberFormatException e) {
+                println("Error parsing temp, humidity: " + e.getMessage());
+            }
+        }
+
+        println("Parsed Data - Pitch: " + pitch + ", Roll: " + roll + ", Yaw: " + yaw + ", Temp: " + temp + ", Humidity: " + humidity);
     }
 }
