@@ -3,6 +3,7 @@ from math import sqrt, atan2, pi
 from mpu9250 import MPU9250
 from time import time, sleep
 
+#class READING_MPU:
 # Initialize LED for program indication
 LED = Pin(25, Pin.OUT)
 LED.value(1)
@@ -53,7 +54,12 @@ P = [[0.0, 0.0], [0.0, 0.0]]
 # Initialize filtered values for low-pass filter
 filtered_x_value = 0.0  # Initialize filtered x-value
 filtered_y_value = 0.0  # Initialize filtered y-value
-
+    
+# Main loop for real-time sensor Read
+#while True:
+#    LED.on()
+#    pitch, roll, yaw = get_reading()
+#    print(f"Pitch: {pitch}, Roll: {roll}, Yaw: {yaw}")
 # Kalman filter implementation
 def kalman_filter(angle, gyro_rate, accel_angle):
     global P, Q_angle, Q_bias, R_measure, dt, bias
@@ -84,7 +90,7 @@ def kalman_filter(angle, gyro_rate, accel_angle):
 # Main sensor reading and calculations
 def get_reading():
     global previous_time, dt, pitch, roll, previous_yaw, filtered_magx, filtered_magy, declination_angle
-
+    
     # Time management
     current_time = time()
     dt = current_time - previous_time
@@ -114,8 +120,8 @@ def get_reading():
 
     return pitch, roll, yaw
 
-# Main loop for real-time sensor Read
-while True:
-    LED.on()
-    pitch, roll, yaw = get_reading()
-    print(f"Pitch: {pitch}, Roll: {roll}, Yaw: {yaw}")
+def run1 ():
+        while True:
+            LED.on()
+            pitch, roll, yaw = get_reading()
+            print(f"Pitch: {pitch}, Roll: {roll}, Yaw: {yaw}")
