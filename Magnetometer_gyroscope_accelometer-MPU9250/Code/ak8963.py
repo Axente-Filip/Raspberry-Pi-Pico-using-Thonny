@@ -1,23 +1,3 @@
-# Copyright (c) 2018-2020 Mika Tuupola
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of  this software and associated documentation files (the "Software"), to
-# deal in  the Software without restriction, including without limitation the
-# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
-# sell copied of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-
 # https://github.com/tuupola/micropython-mpu9250
 # https://www.akm.com/akm/en/file/datasheet/AK8963C.pdf
 
@@ -138,49 +118,59 @@ class AK8963:
         """ Value of the whoami register. """
         return self._register_char(_WIA)
 
-    def calibrate(self, count=256, delay=200):
-        self._offset = (0, 0, 0)
-        self._scale = (1, 1, 1)
+    def calibrate(self, enable=True,count=256, delay=200):
+        if enable:
+            self._offset = (0, 0, 0)
+            self._scale = (1, 1, 1)
 
-        reading = self.magnetic
-        minx = maxx = reading[0]
-        miny = maxy = reading[1]
-        minz = maxz = reading[2]
-
-        while count:
-            utime.sleep_ms(delay)
             reading = self.magnetic
-            minx = min(minx, reading[0])
-            maxx = max(maxx, reading[0])
-            miny = min(miny, reading[1])
-            maxy = max(maxy, reading[1])
-            minz = min(minz, reading[2])
-            maxz = max(maxz, reading[2])
-            count -= 1
-            print(count)
+            minx = maxx = reading[0]
+            miny = maxy = reading[1]
+            minz = maxz = reading[2]
+
+            while count:
+                utime.sleep_ms(delay)
+                reading = self.magnetic
+                minx = min(minx, reading[0])
+                maxx = max(maxx, reading[0])
+                miny = min(miny, reading[1])
+                maxy = max(maxy, reading[1])
+                minz = min(minz, reading[2])
+                maxz = max(maxz, reading[2])
+                count -= 1
+                print(count)
             
-        # Good-> Hard iron distorsion fix
-        """ Hard iron-> when we have permanent magnetic field from other component among the magnetometer, so it can interference with the magnetometer-> BAD (speaker and magnetometer inside
-        of phone) """
-        offset_x = (maxx + minx) / 2
-        offset_y = (maxy + miny) / 2
-        offset_z = (maxz + minz) / 2
+            # Good-> Hard iron distorsion fix
+            """ Hard iron-> when we have permanent magnetic field from other component among the magnetometer, so it can interference with the magnetometer-> BAD (speaker and magnetometer inside
+            of phone) """
+            offset_x = (maxx + minx) / 2
+            offset_y = (maxy + miny) / 2
+            offset_z = (maxz + minz) / 2
+        
+            self._offset = (offset_x, offset_y, offset_z)
 
-        self._offset = (offset_x, offset_y, offset_z)
+            # Soft iron correction
+            """ Materials that distors the magnetic field but does not necessarly generate magnetic field itself ( iron among magnetometer can create a distorsion, that depend of position of iron ) """
+            avg_delta_x = (maxx - minx) / 2
+            avg_delta_y = (maxy - miny) / 2
+            avg_delta_z = (maxz - minz) / 2
 
-        # Soft iron correction
-        """ Materials that distors the magnetic field but does not necessarly generate magnetic field itself ( iron among magnetometer can create a distorsion, that depend of position of iron ) """
-        avg_delta_x = (maxx - minx) / 2
-        avg_delta_y = (maxy - miny) / 2
-        avg_delta_z = (maxz - minz) / 2
+            avg_delta = (avg_delta_x + avg_delta_y + avg_delta_z) / 3
 
-        avg_delta = (avg_delta_x + avg_delta_y + avg_delta_z) / 3
-
-        scale_x = avg_delta / avg_delta_x
-        scale_y = avg_delta / avg_delta_y
-        scale_z = avg_delta / avg_delta_z
-
-        self._scale = (scale_x, scale_y, scale_z)
+            scale_x = avg_delta / avg_delta_x
+            scale_y = avg_delta / avg_delta_y
+            scale_z = avg_delta / avg_delta_z
+        
+            self._scale = (scale_x, scale_y, scale_z)
+        
+            print(self._offset)
+            print(self._scale)
+        
+        else:
+            # Timisoara prestabilet (After run calib for 256)
+            self._offset = (33.9668, 53.93906, -35.82744)
+            # Timisoara prestabilet (After run calib for 256)
+            self._scale = (0.9697253, 1.06285, 0.9728449)
 
         return self._offset, self._scale
 
