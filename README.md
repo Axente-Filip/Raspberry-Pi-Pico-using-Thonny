@@ -32,3 +32,4 @@ Cool Features ✨
 
 
 <img src="https://t.bkit.co/w_68239f8e762ab.gif" />
+<img src="https://t.bkit.co/w_68241dda59945.gif" />
