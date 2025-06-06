@@ -2,7 +2,7 @@
 
 	#Raspberry Pi Pico
 	
-^ Download the latest firmware for the board you want to use, in our case, the Raspberry Pi Pico: https://micropython.org/download/RPI_PICO/
+^ Download the latest firmware for the board you want to use, in our case, the Raspberry Pi Pico: https://micropython.org/download/RPI_PICO/ ; Pico 2 W: https://micropython.org/download/RPI_PICO2_W/
 ^^ Copy the downloaded file (in my case, RPI_PICO-20250424-v1.26.0-preview.31.g076e07197.uf2) to your board (next step).
 ^^^ Before connecting the board, press and hold the button on the Raspberry Pi Pico, then power the board, and the Pico directory will open on your PC.
 ^^^^ After copying the file to the Raspberry Pi Pico directory, the directory will automatically close. Disconnect and reconnect the board without pressing the boot button again (from now on).

@@ -6,6 +6,7 @@ MicroPython I2C driver for MPU9250 9-axis motion tracking device
 from micropython import const
 from mpu6500 import MPU6500
 from ak8963 import AK8963
+from mpu6500 import ACCEL_FS_SEL_8G, GYRO_FS_SEL_1000DPS
 # pylint: enable=import-error
 
 __version__ = "0.3.0"
@@ -17,16 +18,15 @@ _I2C_BYPASS_EN = const(0b00000010)
 _I2C_BYPASS_DIS = const(0b00000000)
 
 class MPU9250:
-    """Class which provides interface to MPU9250 9-axis motion tracking device."""
-    def __init__(self, i2c, mpu6500 = None, ak8963 = None):
+    def __init__(self, i2c, accel_fs=ACCEL_FS_SEL_8G, gyro_fs=GYRO_FS_SEL_1000DPS, mpu6500=None, ak8963=None):
         if mpu6500 is None:
-            self.mpu6500 = MPU6500(i2c)
+            self.mpu6500 = MPU6500(i2c, accel_fs=accel_fs, gyro_fs=gyro_fs)  #  Pass settings to MPU6500
         else:
             self.mpu6500 = mpu6500
 
-        # Enable I2C bypass to access AK8963 directly.
+        # Enable I2C bypass for AK8963
         char = self.mpu6500._register_char(_INT_PIN_CFG)
-        char &= ~_I2C_BYPASS_MASK # clear I2C bits
+        char &= ~_I2C_BYPASS_MASK  # Clear I2C bits
         char |= _I2C_BYPASS_EN
         self.mpu6500._register_char(_INT_PIN_CFG, char)
 

@@ -118,7 +118,7 @@ class AK8963:
         """ Value of the whoami register. """
         return self._register_char(_WIA)
 
-    def calibrate(self, enable=True,count=256, delay=200):
+    def calibrate(self, enable=True,count=1024, delay=100):
         if enable:
             self._offset = (0, 0, 0)
             self._scale = (1, 1, 1)
@@ -168,9 +168,9 @@ class AK8963:
         
         else:
             # Timisoara prestabilet (After run calib for 256)
-            self._offset = (33.9668, 53.93906, -35.82744)
+            self._offset = (42.86719, 56.76358, -34.95147)
             # Timisoara prestabilet (After run calib for 256)
-            self._scale = (0.9697253, 1.06285, 0.9728449)
+            self._scale = (1.029001, 0.9019999, 1.087505)
 
         return self._offset, self._scale
 

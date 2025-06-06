@@ -31,15 +31,15 @@ _GYRO_ZOUT_L = const(0x48)
 _WHO_AM_I = (0x75)
 
 #_ACCEL_FS_MASK = const(0b00011000)
-ACCEL_FS_SEL_2G = const(0b00000000)
+ACCEL_FS_SEL_2G = const(0b00000000)		# - Most sensitive, detects small movements best.
 ACCEL_FS_SEL_4G = const(0b00001000)
 ACCEL_FS_SEL_8G = const(0b00010000)
-ACCEL_FS_SEL_16G = const(0b00011000)
+ACCEL_FS_SEL_16G = const(0b00011000)	# -  Least sensitive, best for high-impact events.
 
-_ACCEL_SO_2G = 16384 # 1 / 16384 ie. 0.061 mg / digit
+_ACCEL_SO_2G = 16384 # 1 / 16384 ie. 0.061 mg / digit	-> Most detailed but can be noisy.
 _ACCEL_SO_4G = 8192 # 1 / 8192 ie. 0.122 mg / digit
 _ACCEL_SO_8G = 4096 # 1 / 4096 ie. 0.244 mg / digit
-_ACCEL_SO_16G = 2048 # 1 / 2048 ie. 0.488 mg / digit
+_ACCEL_SO_16G = 2048 # 1 / 2048 ie. 0.488 mg / digit	-> Works well for fast motion but loses detail.
 
 #_GYRO_FS_MASK = const(0b00011000)
 GYRO_FS_SEL_250DPS = const(0b00000000)
@@ -64,8 +64,10 @@ class MPU6500:
     """Class which provides interface to MPU6500 6-axis motion tracking device."""
     def __init__(
         self, i2c, address=0x68,
-        accel_fs=ACCEL_FS_SEL_2G, gyro_fs=GYRO_FS_SEL_250DPS,
-        accel_sf=SF_M_S2, gyro_sf=SF_RAD_S,
+        accel_fs=ACCEL_FS_SEL_4G,
+        gyro_fs=GYRO_FS_SEL_1000DPS,
+        accel_sf=SF_M_S2,
+        gyro_sf=SF_RAD_S,
         gyro_offset=(0, 0, 0)
     ):
         self.i2c = i2c
@@ -126,20 +128,31 @@ class MPU6500:
         """ Value of the whoami register. """
         return self._register_char(_WHO_AM_I)
 
-    def calibrate(self, count=256, delay=0):
+    def calibrate(self,value, count=1024, delay=100):
         ox, oy, oz = (0.0, 0.0, 0.0)
         self._gyro_offset = (0.0, 0.0, 0.0)
         n = float(count)
-
-        while count:
-            utime.sleep_ms(delay)
-            gx, gy, gz = self.gyro
-            ox += gx
-            oy += gy
-            oz += gz
-            count -= 1
-
-        self._gyro_offset = (ox / n, oy / n, oz / n)
+        
+        if value == True:
+            print ("Calibrating MPU6500...")
+            while count:
+                utime.sleep_ms(delay)
+                gx, gy, gz = self.gyro
+                ox += gx
+                oy += gy
+                oz += gz
+                count -= 1
+                print(count)
+            print(f"ox: {ox},oy: {oy},oz: {oz}")
+            self._gyro_offset = (ox / n, oy / n, oz / n)
+        if not value:
+            # These is my value after calib for 256 cont and delay, you need to modify for you re case
+            print ("Not calibrating MPU6500 ...")
+            ox = -233.9716
+            oy = -8.704907
+            oz = -10.26497
+            print(f"ox: {ox},oy: {oy},oz: {oz}")
+            self._gyro_offset = (ox / n, oy / n, oz / n)
         return self._gyro_offset
 
     def _register_short(self, register, value=None, buf=bytearray(2)):

@@ -1,10 +1,8 @@
-from nrf24l01 import NRF24L01
 from machine import SPI, Pin, I2C, UART
 import utime
 import time
 import struct
-from ReadMPU9250 import MPU
-mpu = MPU()
+from Nrf24IO1 import NRF24L01
 
 # Turn on the LED from Raspberry Pi Pico => the device is functional/ON
 LED = Pin(25, Pin.OUT)
@@ -26,13 +24,13 @@ MISO -> MOSI
 cs = Pin(15, mode=Pin.OUT, value=1)  # GPIO15
 ce = Pin(14, mode=Pin.OUT, value=0)  # GPIO14
 spi = SPI(0, baudrate=9600, polarity=0, phase=0, sck=Pin(18), mosi=Pin(19), miso=Pin(16))
-Payload_size = 8  # Set max/avg byte send and receive in a message; max we can transmit is 32 bytes
+Payload_size = 24  # Set max/avg byte send and receive in a message; max we can transmit is 32 bytes
 
 uart = UART(0, baudrate=9600, tx=Pin(0), rx=Pin(1))
 
 # Choose your role
-role = "send"
-# role = "receive"
+#role = "send"
+role = "receive"
 
 if role == "send":
     send_pipe = b"\xe1\xf0\xf0\xf0\xf0"
@@ -55,6 +53,7 @@ def setup():
     nrf.set_auto_ack(False) # Auto Acknowledgment -> If is True, it verify if the receiver get an information you sended; turn off if you dont have receiver yet *
     
     nrf.start_listening()
+    print("Finished ...")
     return nrf
 
 def send(nrf, msg):
@@ -82,19 +81,19 @@ msg_string = ""
 while True:
     msg = ""
     if role == "send":
-        #pitch, roll, yaw = mpu.get_reading()
-        #send(nrf, f"Pitch: {pitch}, Roll: {roll}, Yaw: {yaw}")
         send(nrf, "Hello World")
     else:
         # Check for Messages
         if nrf.any():
             package = nrf.recv()
-            message = struct.unpack("s", package)
+            message = struct.unpack("s", package) #For String
+            #pitch, roll, yaw = struct.unpack("fff", package) #For Float
+            print(f"Received - Pitch: {pitch}, Roll: {roll}, Yaw: {yaw}")
             msg = message[0].decode()
 
             # Check for the new line character
             if (msg == "\n") and (len(msg_string) <= 32):
-                print("full message", msg_string, msg)
+                print("", msg_string, msg)
                 msg_string = ""
             else:
                 if len(msg_string) <= 32:

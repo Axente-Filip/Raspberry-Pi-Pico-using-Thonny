@@ -41,8 +41,8 @@ void draw() {
   pushMatrix();  // Save current transformation matrix
   translate(width / 2, height / 2, -200);  // Center the object
   rotateY(radians(-yaw));  // Rotate the car based on yaw
-  rotateZ(radians(-pitch));  // Rotate the car based on pitch
-  rotateX(radians(roll));  // Rotate the car based on roll
+  rotateZ(radians(-pitch+15));  // Rotate the car based on pitch
+  rotateX(radians(roll-15));  // Rotate the car based on roll
 
   // Car Body
   fill(0, 150, 100);  // Color
